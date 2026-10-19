@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Game</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #171738, #3e206d);
+            color: white;
+        }
+
+        .game-card {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            text-align: center;
+            border-radius: 20px;
+            background: #25254a;
+            box-shadow: 0 10px 35px #0005;
+        }
+
+        h1 {
+            color: #f8cf65;
+            margin-top: 0;
+        }
+
+        .word {
+            margin: 28px 0;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 5px;
+            overflow-wrap: anywhere;
+        }
+
+        .attempts {
+            color: #ffd166;
+            font-size: 18px;
+        }
+
+        .letters {
+            color: #d3d3f0;
+            overflow-wrap: anywhere;
+        }
+
+        input {
+            width: 75px;
+            padding: 12px;
+            margin: 10px 5px;
+            border: 2px solid #aaa;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            text-transform: lowercase;
+        }
+
+        button, .button {
+            display: inline-block;
+            padding: 12px 20px;
+            margin: 8px 4px;
+            border: none;
+            border-radius: 8px;
+            background: #f8cf65;
+            color: #20203e;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover, .button:hover {
+            background: #ffe49b;
+        }
+
+        .message {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #75f0a7;
+        }
+
+        .failure {
+            color: #ff8989;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="game-card">
+        <h1>🎯 Hangman Game</h1>
+        <p>Guess the hidden word one letter at a time!</p>
+
+        <p class="word">{{ word_display }}</p>
+
+        <p class="attempts">
+            ❤️ Attempts left: {{ attempts_left }} / 6
+        </p>
+
+        <p class="letters">
+            Guessed letters:
+            {% for letter in guessed_letters %}
+                {{ letter|upper }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+                None yet
+            {% endfor %}
+        </p>
+
+        {% if is_won %}
+            <p class="message success">🎉 Congratulations! You won!</p>
+            <a class="button" href="{% url 'restart_game' %}">
+                Play Again
+            </a>
+
+        {% elif is_lost %}
+            <p class="message failure">❌ Game Over!</p>
+            <p>The correct word was:
+                <strong>{{ correct_answer|upper }}</strong>
+            </p>
+            <a class="button" href="{% url 'restart_game' %}">
+                Try Again
+            </a>
+
+        {% else %}
+            <form method="post" action="{% url 'guess_letter' %}">
+                {% csrf_token %}
+
+                <label for="letter">Enter a letter:</label>
+                <br>
+
+                <input
+                    type="text"
+                    id="letter"
+                    name="letter"
+                    maxlength="1"
+                    pattern="[A-Za-z]"
+                    title="Enter one English letter"
+                    autocomplete="off"
+                    required
+                >
+
+                <button type="submit">Guess</button>
+            </form>
+        {% endif %}
+    </main>
+</body>
+</html>
